@@ -30,4 +30,5 @@ class LibraryDB:
 	def game_deleted(self, game_id):
 		for l in self.libraries:
 			for key in l:
-				l[key].remove(game_id)
+				if game_id in l[key]:
+					l[key].remove(game_id)
