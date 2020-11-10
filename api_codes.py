@@ -22,4 +22,18 @@ API_MESSAGES = {
 	'3005': 'El "id" del videojuego debe ser proporcionado para realizar la actualizacion',
 	'3006': 'Videojuego editado con exito',
 	'3007': 'Videojuego eliminado con exito',
+	'3008': 'No se ha proporcionado una categoria a buscar',
+	'3009': 'No se han encontrado videojuegos',
+	'3010': 'Videojuegos encontrados',
+	# LIBRARY
+	'4001': 'El usuario no tiene videojuegos',
+	'4002': 'El usuario si tiene videojuegos',
+	'4003': 'El ID del videojuego debe ser proporcionado',
+	'4004': 'El videojuego ha sido agregado a la libreria',
+	'4005': 'El videojuego ha sido removido de las bibliotecas',
+	'4006': 'Se ha verificado que el juego exista en la biblioteca del usuario',
+	# COMMENTS
+	'5001': 'Comentario agregado con exito',
+	'5002': 'Comentarios encontrados',
+	'5003': 'Comentarios no encontrados'
 }

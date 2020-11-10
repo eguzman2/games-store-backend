@@ -23,6 +23,16 @@ class VideogameDB:
 				break
 		return videogame
 
+	def search(self, search_text):
+		videogames = []
+		for u in self.videogames:
+			category_string = u.category1 + u.category2 + u.category3
+			category_string = category_string.lower()
+			search_text = search_text.lower()
+			if category_string.find(search_text) != -1:
+				videogames.append(u)
+		return videogames
+
 	def get_next_id(self):
 		self.sort()
 		if len(self.videogames) == 0:

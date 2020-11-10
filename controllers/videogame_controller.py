@@ -1,5 +1,6 @@
 from models.videogame import Videogame
 from database.videogame_db import VideogameDB
+import json
 
 
 class VideogameController:
@@ -27,6 +28,25 @@ class VideogameController:
 			else:
 				response['code'] = '3003'
 
+		return response
+
+	def find(self, data):
+		response = dict()
+		response['error'] = True
+
+		search_text = data['search_text'] if 'search_text' in data else ""
+
+		if search_text == "":
+			response['code'] = '3008'
+		else:
+			videogames = self.VIDEOGAME_DB.search(search_text)
+			if videogames:
+				response = json.dumps([videogame.dump() for videogame in videogames])
+				# response['code'] = '3010'
+				# response['error'] = False
+				print(response)
+			else:
+				response['code'] = '3009'
 		return response
 
 	def create(self, data):
@@ -76,7 +96,6 @@ class VideogameController:
 														 category2, category3, picture,
 														 banner, description)
 			if updated:
-				response.update(updated.dump())
 				response['code'] = '3006'
 				response['error'] = False
 			else:
@@ -98,6 +117,7 @@ class VideogameController:
 			if deleted:
 				response['error'] = False
 				response['code'] = '3007'
+				response['id'] = id
 			else:
 				response['code'] = '3003'
 

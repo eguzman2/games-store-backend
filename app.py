@@ -2,10 +2,15 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from controllers.user_controller import UserController
 from controllers.videogame_controller import VideogameController
+from controllers.library_controller import LibraryController
+from controllers.comment_controller import CommentController
 from api_codes import API_MESSAGES
+import json
 
 USER_CONTROLLER = UserController()
 VIDEOGAME_CONTROLLER = VideogameController()
+LIBRARY_CONTROLLER = LibraryController()
+COMMENT_CONTROLLER = CommentController()
 
 admin_data = {
     'id': 0,
@@ -24,28 +29,7 @@ user_data = {
 }
 USER_CONTROLLER.create(user_data)
 
-overwatch_data = {
-    'name': 'Overwatch',
-    'year': '2016',
-    'price': 150.00,
-    'category1': 'FPS',
-    'category2': 'Multijugador',
-    'category3': '',
-    'picture': 'https://vignette1.wikia.nocookie.net/overwatch/images/9/9c/OW_SE_FOB_r4.jpg/revision/latest?cb=20151112212313',
-    'banner': 'https://s1.thcdn.com/widgets/96-en/53/OVERWATCH-top-banner-012553.jpg',
-    'description': 'Overwatch es un videojuego de disparos en primera persona multijugador, '
-                   'desarrollado por Blizzard Entertainment. Fue lanzado al público el 24 de mayo del 2016, '
-                   'para las plataformas PlayStation 4, Xbox One, Microsoft Windows y Nintendo Switch. '
-                   'El juego fue anunciado el 7 de noviembre de 2014 durante la BlizzCon 2014, '
-                   'y su versión beta cerrada fue estrenada el 27 de octubre de 2015. \n '
-                   'Overwatch pone a los jugadores en equipos de seis personas, con cada persona escogiendo '
-                   'uno de varios héroes disponibles, cada uno con movimientos y habilidades únicas. '
-                   'Los héroes están divididos en tres clases: Daño, Tanque y Apoyo. Los jugadores de cada '
-                   'equipo trabajan juntos para atacar y defender puntos de control o para atacar/defender '
-                   '"cargas" (objetivos móviles que se mueven alrededor del mapa). Al terminar la partida '
-                   'los jugadores acumulan puntos, que les otorgan recompensas estéticas que no afectan el desempeño de juego.\n '
-}
-VIDEOGAME_CONTROLLER.create(overwatch_data)
+
 dota_data = {
     'name': 'Dota 2',
     'year': '2013',
@@ -106,6 +90,28 @@ valorant_data = {
                    'Tuvo una beta cerrada que fue lanzada el 7 de abril de 2020.'
 }
 VIDEOGAME_CONTROLLER.create(valorant_data)
+overwatch_data = {
+    'name': 'Overwatch',
+    'year': '2016',
+    'price': 150.00,
+    'category1': 'FPS',
+    'category2': 'Multijugador',
+    'category3': '',
+    'picture': 'https://vignette1.wikia.nocookie.net/overwatch/images/9/9c/OW_SE_FOB_r4.jpg/revision/latest?cb=20151112212313',
+    'banner': 'https://s1.thcdn.com/widgets/96-en/53/OVERWATCH-top-banner-012553.jpg',
+    'description': 'Overwatch es un videojuego de disparos en primera persona multijugador, '
+                   'desarrollado por Blizzard Entertainment. Fue lanzado al público el 24 de mayo del 2016, '
+                   'para las plataformas PlayStation 4, Xbox One, Microsoft Windows y Nintendo Switch. '
+                   'El juego fue anunciado el 7 de noviembre de 2014 durante la BlizzCon 2014, '
+                   'y su versión beta cerrada fue estrenada el 27 de octubre de 2015. \n '
+                   'Overwatch pone a los jugadores en equipos de seis personas, con cada persona escogiendo '
+                   'uno de varios héroes disponibles, cada uno con movimientos y habilidades únicas. '
+                   'Los héroes están divididos en tres clases: Daño, Tanque y Apoyo. Los jugadores de cada '
+                   'equipo trabajan juntos para atacar y defender puntos de control o para atacar/defender '
+                   '"cargas" (objetivos móviles que se mueven alrededor del mapa). Al terminar la partida '
+                   'los jugadores acumulan puntos, que les otorgan recompensas estéticas que no afectan el desempeño de juego.\n '
+}
+VIDEOGAME_CONTROLLER.create(overwatch_data)
 
 app = Flask(__name__)
 CORS(app)
@@ -157,6 +163,13 @@ def get_user():
         res['message'] = API_MESSAGES[res['code']]
         return res
 
+@app.route("/user/get-all", methods=['POST'])
+def get_all_users():
+    if request.method == 'POST':
+        data = request.json
+        res = USER_CONTROLLER.get_users('json')
+        return res
+
 @app.route("/user/forgot_password", methods=['POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -165,6 +178,31 @@ def forgot_password():
         res['message'] = API_MESSAGES[res['code']]
         return res
 
+@app.route("/user/games/add", methods=['POST'])
+def add_user_game():
+    if request.method == 'POST':
+        data = request.json
+        res = LIBRARY_CONTROLLER.add_game(data)
+        res['message'] = API_MESSAGES[res['code']]
+        return res
+
+@app.route("/user/games/get", methods=['POST'])
+def get_user_games():
+    if request.method == 'POST':
+        data = request.json
+        res = LIBRARY_CONTROLLER.get_game_ids(data)
+        game_ids = res['game_ids']
+        res['games_data'] = [VIDEOGAME_CONTROLLER.get_videogame({'id': id}) for id in game_ids]
+        res['message'] = API_MESSAGES[res['code']]
+        return res
+
+@app.route("/user/games/check", methods=['POST'])
+def check_videogame():
+    if request.method == 'POST':
+        data = request.json
+        res = LIBRARY_CONTROLLER.check_game(data)
+        res['message'] = API_MESSAGES[res['code']]
+        return res
 
 @app.route("/videogame/create", methods=['POST'])
 def create_videogame():
@@ -182,6 +220,18 @@ def update_videogame():
         res['message'] = API_MESSAGES[res['code']]
         return res
 
+@app.route("/videogame/delete", methods=['POST'])
+def delete_videogames():
+    if request.method == 'POST':
+        data = request.json
+        res = VIDEOGAME_CONTROLLER.delete(data)
+        res['message'] = API_MESSAGES[res['code']]
+        if not res['error']:
+            del_from_libraries = LIBRARY_CONTROLLER.game_deleted(res['id'])
+            res['deleted_from_libraries'] = del_from_libraries
+            res['deleted_from_libraries']['message'] = API_MESSAGES[del_from_libraries['code']]
+        return res
+
 @app.route("/videogame/get", methods=['POST'])
 def get_videogame():
     if request.method == 'POST':
@@ -195,6 +245,29 @@ def get_videogames():
     if request.method == 'POST':
         data = request.json
         res = VIDEOGAME_CONTROLLER.get_videogames('json')
+        return res
+
+@app.route("/videogame/category/find", methods=['POST'])
+def find_videogames():
+    if request.method == 'POST':
+        data = request.json
+        res = VIDEOGAME_CONTROLLER.find(data)
+        return res
+
+@app.route("/videogame/comment/add", methods=['POST'])
+def add_comment():
+    if request.method == 'POST':
+        data = request.json
+        res = COMMENT_CONTROLLER.create(data)
+        res['message'] = API_MESSAGES[res['code']]
+        return res
+
+@app.route("/videogame/comment/get", methods=['POST'])
+def get_comments():
+    if request.method == 'POST':
+        data = request.json
+        res = COMMENT_CONTROLLER.get_comments_by_game(data)
+        res['message'] = API_MESSAGES[res['code']]
         return res
 
 if __name__ == "__main__":
